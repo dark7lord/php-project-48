@@ -1,0 +1,26 @@
+{
+    "name": "hexlet/code",
+    "description": "Generating the difference between two files",
+    "autoload": {
+        "psr-4": {
+            "Hexlet\\Code\\": "src/"
+        },
+        "files": [
+            "src/Cli/Cli.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "gopal",
+            "email": "gopal@student.21-school.ru"
+        }
+    ],
+    "require": {
+        "docopt/docopt": "^1.0"
+    },
+    "bin": "bin/gendiff",
+    "license": "MIT",
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.9"
+    }
+}
