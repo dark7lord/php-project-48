@@ -36,8 +36,9 @@ class DifferTest extends TestCase
             ]
 
         ];
-
         $actual = Differ\genDiff($tree1, $tree2);
+        $this->assertIsArray($actual);
+
         $this->assertEquals($actual, $expected);
     }
 }
