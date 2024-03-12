@@ -23,18 +23,21 @@ class DifferTest extends TestCase
 
         $expected = [
             'deleted' => [
-                'follow' => false
+                'follow' => false,
+                'proxy' => '123.234.53.22',
             ],
-            'unchanged' => [
+            'unchangedEntries' => [
                 'host' => 'hexlet.io'
             ],
-            'changed' => [
-                'timeout' => [50, 20]
+            'changedEntries' => [
+                'timeout' => [
+                    'oldValue' => 50,
+                    'newValue' => 20
+                ]
             ],
             'added' => [
                 'verbose' => true
             ]
-
         ];
         $actual = Differ\genDiff($tree1, $tree2);
         $this->assertIsArray($actual);
