@@ -10,6 +10,11 @@
             "src/Differ/Differ.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Differ\\Differ\\Tests\\": "tests"
+        }
+    },
     "authors": [
         {
             "name": "gopal",

@@ -3,7 +3,9 @@
 namespace Differ\Cli;
 
 use Docopt;
-use function Differ\Differ\gendiff;
+use RuntimeException;
+
+use function Differ\Differ\genDiff;
 
 function readJsonFile($filename)
 {
@@ -11,11 +13,11 @@ function readJsonFile($filename)
         $fileContent = file_get_contents($filename);
         $tree = json_decode($fileContent, true);
         if ($tree === null && json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException("Error decoding JSON in file $filename");
+            throw new RuntimeException("Error decoding JSON in file $filename");
         }
         return $tree;
     } else {
-        throw new \RuntimeException("Error reading file $filename");
+        throw new RuntimeException("Error reading file $filename");
     }
 }
 
@@ -56,15 +58,11 @@ DOC;
     try {
         $tree1 = readJsonFile($filename1);
         $tree2 = readJsonFile($filename2);
-        print_r($tree1);
-        print_r($tree2);
-    } catch (\RuntimeException $e) {
+
+        $result = genDiff($tree1, $tree2);
+        var_dump($result);
+    } catch (RuntimeException $e) {
         echo $e->getMessage();
         exit;
     }
-
-
-//    gendiff($file1, $file2);
-//
-//    print_r($file1);
 }
