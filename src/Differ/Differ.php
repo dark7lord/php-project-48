@@ -12,36 +12,40 @@ function makeDiffToString($tree, $offset = 2): string
             'value' => $value
         ] = $property;
 
-        if (is_bool($value)) {
-            $value = $value ? 'true' : 'false';
-        }
+        $formattedValue = is_bool($value) ? ($value ? 'true' : 'false') : $value;
 
-        if ($type === 'unchanged') {
-            return "$padding   $key: $value";
-        }
-        if ($type === 'added') {
-            return "$padding + $key: $value";
-        }
-        if ($type === 'deleted') {
-            return "$padding - $key: $value";
-        }
-        if ($type === 'changed') {
-            [
-                'oldValue' => $oldValue,
-                'newValue' => $newValue
-            ] = $value;
-
-            $oldString = "$padding - $key: $oldValue";
-            $newString = "$padding + $key: $newValue";
-
-            return "$oldString\n$newString";
-        }
-
-        return '';
+        return match ($type) {
+            'unchanged' => "$padding   $key: $formattedValue",
+            'added' => "$padding + $key: $formattedValue",
+            'deleted' => "$padding - $key: $formattedValue",
+            'changed' => "$padding - $key: {$value['oldValue']}\n$padding + $key: {$value['newValue']}",
+            default => ''
+        };
     }, $tree);
 
     return implode("\n", ['{', ...$lines, "}"]);
 }
+
+function createDiffItem($key, $tree1, $tree2, $deletedKeys, $addedKeys): array
+{
+    $value = function ($type, $data) {
+        return ['type' => $type, 'value' => $data];
+    };
+
+    switch (true) {
+        case in_array($key, $deletedKeys):
+            return $value('deleted', $tree1[$key]);
+        case in_array($key, $addedKeys):
+            return $value('added', $tree2[$key]);
+        default:
+            $oldValue = $tree1[$key];
+            $newValue = $tree2[$key];
+            return ($oldValue === $newValue) ?
+                $value('unchanged', $oldValue) :
+                $value('changed', ['oldValue' => $oldValue, 'newValue' => $newValue]);
+    }
+}
+
 
 function generateDiff($tree1, $tree2): array
 {
@@ -53,37 +57,10 @@ function generateDiff($tree1, $tree2): array
     $allKeys = array_unique(array_merge($keys1, $keys2));
     sort($allKeys);
 
-    $resultTree = array_map(function ($key) use ($tree1, $tree2, $deletedKeys, $addedKeys) {
-        if (in_array($key, $deletedKeys)) {
-            $type = 'deleted';
-            $value = $tree1[$key];
-        } elseif (in_array($key, $addedKeys)) {
-            $type = 'added';
-            $value = $tree2[$key];
-        } else {
-            $oldValue = $tree1[$key];
-            $newValue = $tree2[$key];
-
-            if ($oldValue === $newValue) {
-                $type = 'unchanged';
-                $value = $tree1[$key];
-            } else {
-                $type = 'changed';
-                $value = [
-                    'oldValue' => $oldValue,
-                    'newValue' => $newValue
-                ];
-            }
-        }
-
-        return [
-            'key' => $key,
-            'type' => $type,
-            'value' => $value
-        ];
-    }, $allKeys);
-
-    return $resultTree;
+    return array_map(
+        fn($key) => ['key' => $key] + createDiffItem($key, $tree1, $tree2, $deletedKeys, $addedKeys),
+        $allKeys
+    );
 }
 
 function genDiff($tree1, $tree2): string
@@ -93,20 +70,3 @@ function genDiff($tree1, $tree2): string
 
     return  $result;
 }
-
-//$tree1 = [
-//    'host' => 'hexlet.io',
-//    'timeout' => 50,
-//    'proxy' => '123.234.53.22',
-//    'follow' => false
-//];
-//$tree2 = [
-//    'timeout' => 20,
-//    'verbose' => true,
-//    'host' => 'hexlet.io'
-//];
-
-//
-//$result = genDiff($tree1, $tree2);
-////$string = makeDiffToString($result);
-//print_r($result);
