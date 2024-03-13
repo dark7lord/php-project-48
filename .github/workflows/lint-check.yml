@@ -5,8 +5,6 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: composer:2
     steps:
       - uses: actions/checkout@v3
 
