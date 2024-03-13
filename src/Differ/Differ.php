@@ -2,7 +2,7 @@
 
 namespace Differ\Differ;
 
-function printDifferecne($tree, $offset = 2)
+function makeDiffToString($tree, $offset = 2): string
 {
     $padding = str_repeat(' ', $offset);
     $lines = array_map(function ($property) use ($padding) {
@@ -11,6 +11,10 @@ function printDifferecne($tree, $offset = 2)
             'type' => $type,
             'value' => $value
         ] = $property;
+
+        if (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
+        }
 
         if ($type === 'unchanged') {
             return "$padding   $key: $value";
@@ -34,15 +38,12 @@ function printDifferecne($tree, $offset = 2)
         }
 
         return '';
-
     }, $tree);
 
-    $result = implode("\n", ['{', ...$lines, '}']);
-    print_r($result);
-    return $result;
+    return implode("\n", ['{', ...$lines, "}"]);
 }
 
-function genDiff($tree1, $tree2)
+function generateDiff($tree1, $tree2): array
 {
     $keys1 = array_keys($tree1);
     $keys2 = array_keys($tree2);
@@ -80,22 +81,32 @@ function genDiff($tree1, $tree2)
             'type' => $type,
             'value' => $value
         ];
-
     }, $allKeys);
-    printDifferecne($resultTree);
-//    var_dump($resultTree);
+
+    return $resultTree;
 }
 
-$tree1 = [
-    'host' => 'hexlet.io',
-    'timeout' => 50,
-    'proxy' => '123.234.53.22',
-    'follow' => false
-];
-$tree2 = [
-    'timeout' => 20,
-    'verbose' => true,
-    'host' => 'hexlet.io'
-];
+function genDiff($tree1, $tree2): string
+{
+    $treeDiff = generateDiff($tree1, $tree2);
+    $result = makeDiffToString($treeDiff);
 
-genDiff($tree1, $tree2);
+    return  $result;
+}
+
+//$tree1 = [
+//    'host' => 'hexlet.io',
+//    'timeout' => 50,
+//    'proxy' => '123.234.53.22',
+//    'follow' => false
+//];
+//$tree2 = [
+//    'timeout' => 20,
+//    'verbose' => true,
+//    'host' => 'hexlet.io'
+//];
+
+//
+//$result = genDiff($tree1, $tree2);
+////$string = makeDiffToString($result);
+//print_r($result);
