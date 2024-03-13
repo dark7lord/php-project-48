@@ -9,6 +9,26 @@ jobs:
       image: composer:2
     steps:
       - uses: actions/checkout@v3
-      - run: make install
-      - run: make lint
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install
+        run: make install
+
+      - name: Run linter
+        run: make lint
+
       - run: make test
+
+#        Test Coverage CodeClimate
+      - name: Run test & publish code coverage
+        uses: paambaati/codeclimate-action@v5
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: make test-coverage
+          coverageLocations: build/logs/clover.xml:clover
+          debug: true
