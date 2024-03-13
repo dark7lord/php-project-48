@@ -21,26 +21,20 @@ class DifferTest extends TestCase
             'host' => 'hexlet.io'
         ];
 
-        $expected = [
-            'deleted' => [
-                'follow' => false,
-                'proxy' => '123.234.53.22',
-            ],
-            'unchangedEntries' => [
-                'host' => 'hexlet.io'
-            ],
-            'changedEntries' => [
-                'timeout' => [
-                    'oldValue' => 50,
-                    'newValue' => 20
-                ]
-            ],
-            'added' => [
-                'verbose' => true
-            ]
-        ];
+        $expected = <<<'EOT'
+{
+   - follow: false
+     host: hexlet.io
+   - proxy: 123.234.53.22
+   - timeout: 50
+   + timeout: 20
+   + verbose: true
+}
+EOT;
+
+//        $expected
         $actual = Differ\genDiff($tree1, $tree2);
-        $this->assertIsArray($actual);
+//        $this->assertIsArray($actual);
 
         $this->assertEquals($actual, $expected);
     }
