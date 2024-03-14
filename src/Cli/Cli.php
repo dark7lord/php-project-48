@@ -21,7 +21,7 @@ function readJsonFile($filename)
     }
 }
 
-function startCli()
+function startCli(): void
 {
     $doc = <<<DOC
 Generate diff.
