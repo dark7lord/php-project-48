@@ -3,23 +3,9 @@
 namespace Differ\Cli;
 
 use Docopt;
-use RuntimeException;
 
 use function Differ\Differ\genDiff;
-
-function readJsonFile($filename)
-{
-    if (file_exists($filename)) {
-        $fileContent = file_get_contents($filename);
-        $tree = json_decode($fileContent, true);
-        if ($tree === null && json_last_error() !== JSON_ERROR_NONE) {
-            throw new RuntimeException("Error decoding JSON in file $filename");
-        }
-        return $tree;
-    } else {
-        throw new RuntimeException("Error reading file $filename");
-    }
-}
+use function Differ\Parsers\parseFile;
 
 function startCli(): void
 {
@@ -42,11 +28,7 @@ DOC;
 
     $arguments = Docopt::handle($doc, $params);
 
-    if ($arguments['--help']) {
-        echo $doc;
-        exit;
-    }
-
+//    TODO: не работает
     if ($arguments['--version']) {
         echo '1.0';
         exit;
@@ -55,14 +37,6 @@ DOC;
     $filename1 = $arguments['<filename1>'];
     $filename2 = $arguments['<filename2>'];
 
-    try {
-        $tree1 = readJsonFile($filename1);
-        $tree2 = readJsonFile($filename2);
-
-        $result = genDiff($tree1, $tree2);
-        var_dump($result);
-    } catch (RuntimeException $e) {
-        echo $e->getMessage();
-        exit;
-    }
+    $result = genDiff($filename1, $filename2);
+    print_r($result);
 }

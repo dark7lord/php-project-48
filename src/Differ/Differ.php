@@ -2,6 +2,8 @@
 
 namespace Differ\Differ;
 
+use function Differ\Parsers\parseFile;
+
 function makeDiffToString($tree, $offset = 2): string
 {
     $padding = str_repeat(' ', $offset);
@@ -28,22 +30,19 @@ function makeDiffToString($tree, $offset = 2): string
 
 function createDiffItem($key, $tree1, $tree2, $deletedKeys, $addedKeys): array
 {
-    $value = function ($type, $data) {
-        return ['type' => $type, 'value' => $data];
-    };
+    $value = fn ($type, $data) => ['type' => $type, 'value' => $data];
 
-    switch (true) {
-        case in_array($key, $deletedKeys):
-            return $value('deleted', $tree1[$key]);
-        case in_array($key, $addedKeys):
-            return $value('added', $tree2[$key]);
-        default:
+    return match (true) {
+        in_array($key, $deletedKeys) => $value('deleted', $tree1[$key]),
+        in_array($key, $addedKeys) => $value('added', $tree2[$key]),
+        default => (function () use ($tree1, $tree2, $key, $value) {
             $oldValue = $tree1[$key];
             $newValue = $tree2[$key];
             return ($oldValue === $newValue) ?
                 $value('unchanged', $oldValue) :
                 $value('changed', ['oldValue' => $oldValue, 'newValue' => $newValue]);
-    }
+        })()
+    };
 }
 
 
@@ -63,8 +62,10 @@ function generateDiff($tree1, $tree2): array
     );
 }
 
-function genDiff($tree1, $tree2): string
+function genDiff($filename1, $filename2): string
 {
+    $tree1 = parseFile($filename1);
+    $tree2 = parseFile($filename2);
     $treeDiff = generateDiff($tree1, $tree2);
     $result = makeDiffToString($treeDiff);
 
